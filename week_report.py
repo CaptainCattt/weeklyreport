@@ -1102,66 +1102,86 @@ def run(platform: str):
                 </div>
             </div>
             """, unsafe_allow_html=True)
+
             with st.container(border=True):
 
                 # Tính tỷ trọng GMV
                 top_products_tt = top_products_tt.copy()
                 total_gmv = top_products_tt["gmv"].sum()
+
                 top_products_tt["percent"] = (
                     top_products_tt["gmv"] / total_gmv * 100
                 ).round(1)
 
+                # Rút gọn tên sản phẩm
+                top_products_tt["short_name"] = (
+                    top_products_tt["Product Name"]
+                    .str.replace("\n", " ", regex=False)
+                    .str.slice(0, 28)
+                )
+
                 fig_top = px.treemap(
                     top_products_tt,
-                    path=["Product Name"],
+                    path=["short_name"],
                     values="gmv",
                     color="gmv",
                     color_continuous_scale=[
-                        "#E0F2FE",
-                        "#7DD3FC",
-                        "#38BDF8",
-                        "#0EA5E9",
-                        "#0369A1",
+                        "#00441A",
+                        "#797700",
+                        "#60A5FA",
+                        "#2563EB",
+                        "#1E40AF"
                     ],
-                    custom_data=["orders", "percent"]
+                    custom_data=[
+                        "Product Name",
+                        "orders",
+                        "percent"
+                    ]
                 )
 
                 fig_top.update_traces(
+
                     marker=dict(
                         line=dict(
-                            color="rgba(255,255,255,0.9)",
+                            color="white",
                             width=2
-                        ),
-                        cornerradius=6  # nếu phiên bản Plotly hỗ trợ
+                        )
                     ),
 
                     texttemplate=(
-                        "%{label}"
-                        "<br><b>%{customdata[1]}%</b>"
-                        "<br>%{value:,.0f}₫"
+                        "<b>%{label}</b>"
+                        "<br>%{customdata[2]}%"
                     ),
 
                     textfont=dict(
-                        family="Arial",
-                        size=13,
-                        color="#ffffff"
+                        family="Inter",
+                        size=14,
+                        color="white"
                     ),
 
                     textposition="middle center",
 
                     hovertemplate=(
-                        "<b>%{label}</b><br>"
-                        "<br>"
-                        "GMV: <b>%{value:,.0f}₫</b><br>"
-                        "Orders: <b>%{customdata[0]:,}</b><br>"
-                        "Tỷ trọng: <b>%{customdata[1]}%</b>"
+                        "<b>%{customdata[0]}</b><br><br>"
+                        "GMV: %{value:,.0f}₫<br>"
+                        "Orders: %{customdata[1]:,}<br>"
+                        "Tỷ trọng: %{customdata[2]}%"
                         "<extra></extra>"
-                    )
+                    ),
+
+                    root_color="rgba(0,0,0,0)"
                 )
 
                 fig_top.update_layout(
-                    height=500,
-                    margin=dict(l=5, r=5, t=15, b=5),
+
+                    height=520,
+
+                    margin=dict(
+                        l=5,
+                        r=5,
+                        t=10,
+                        b=5
+                    ),
 
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
@@ -1169,13 +1189,20 @@ def run(platform: str):
                     coloraxis_showscale=False,
 
                     uniformtext=dict(
-                        minsize=12,
+                        minsize=11,
                         mode="hide"
+                    ),
+
+                    hoverlabel=dict(
+                        bgcolor="white",
+                        font_size=13,
+                        font_family="Inter",
+                        font_color="#111827"
                     ),
 
                     font=dict(
                         family="Inter",
-                        size=13
+                        color="#111827"
                     )
                 )
 
