@@ -770,12 +770,12 @@ def run(platform: str):
             # TOP PRODUCTS
             # =====================================================
             top_products_tt = (
-                df_valid_this_week_tt.groupby("Product Name")
+                df_valid_this_week_tt.groupby("SKU Category")
                 .agg(
-                    gmv=("SKU Subtotal After Discount", "sum"),
+                    nmv=("SKU Subtotal After Discount", "sum"),
                     orders=("Order ID", "nunique")
                 )
-                .sort_values("gmv", ascending=False)
+                .sort_values("nmv", ascending=False)
                 .head(10)
                 .reset_index()
             )
@@ -1107,15 +1107,15 @@ def run(platform: str):
 
                 # Tính tỷ trọng GMV
                 top_products_tt = top_products_tt.copy()
-                total_gmv = top_products_tt["gmv"].sum()
+                total_nmv = top_products_tt["nmv"].sum()
 
                 top_products_tt["percent"] = (
-                    top_products_tt["gmv"] / total_gmv * 100
+                    top_products_tt["nmv"] / total_nmv * 100
                 ).round(1)
 
                 # Rút gọn tên sản phẩm
                 top_products_tt["short_name"] = (
-                    top_products_tt["Product Name"]
+                    top_products_tt["SKU Category"]
                     .str.replace("\n", " ", regex=False)
                     .str.slice(0, 28)
                 )
@@ -1123,8 +1123,8 @@ def run(platform: str):
                 fig_top = px.treemap(
                     top_products_tt,
                     path=["short_name"],
-                    values="gmv",
-                    color="gmv",
+                    values="nmv",
+                    color="nmv",
                     color_continuous_scale=[
                         "#00441A",
                         "#797700",
@@ -1133,7 +1133,7 @@ def run(platform: str):
                         "#1E40AF"
                     ],
                     custom_data=[
-                        "Product Name",
+                        "SKU Category",
                         "orders",
                         "percent"
                     ]
@@ -1163,7 +1163,7 @@ def run(platform: str):
 
                     hovertemplate=(
                         "<b>%{customdata[0]}</b><br><br>"
-                        "GMV: %{value:,.0f}₫<br>"
+                        "NMV: %{value:,.0f}₫<br>"
                         "Orders: %{customdata[1]:,}<br>"
                         "Tỷ trọng: %{customdata[2]}%"
                         "<extra></extra>"
@@ -1545,13 +1545,6 @@ def run(platform: str):
                     <div class="kpi-value" style="color:#DC2626;">{orders_cancelled_this_week:,}</div>
                     <div style="font-size:14px;color:#64748b;margin-bottom:8px;">
                         Tuần trước: <b>{orders_cancelled_last_week:,}</b>
-                    </div>
-                    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">
-                        Cancel Rate: <b style="color:#DC2626;">{cancel_rate_this_week:.1f}%</b>
-                        vs <b>{cancel_rate_last_week:.1f}%</b>
-                        <span style="color:{'#dc2626' if cancel_rate_delta >= 0 else '#16a34a'};">
-                            ({cancel_rate_delta:+.2f}pp)
-                        </span>
                     </div>
                     <div class="{'metric-tag-red' if wow_cancelled >= 0 else 'metric-tag-green'}">
                         {'▲' if wow_cancelled >= 0 else '▼'} {wow_cancelled:+.2f}% vs Tuần trước
