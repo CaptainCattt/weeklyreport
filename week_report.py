@@ -423,6 +423,7 @@ def run(platform: str):
             border-radius: 22px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             border: 1px solid #edf0f7;
+            margin-bottom: 8px;
         }
 
         .section-title {
@@ -435,7 +436,6 @@ def run(platform: str):
         .section-subtitle {
             color: #6b7280;
             font-size: 14px;
-            margin-bottom: 20px;
         }
 
         .placeholder-chart {
@@ -480,6 +480,28 @@ def run(platform: str):
             font-weight: 600;
             width: fit-content;
         }
+        /* =====================================================
+        CHART HEADER
+        ===================================================== */
+        .chart-header {
+            background: var(--card-bg);
+            padding:
+                24px
+                24px 
+                12px
+                24px;
+            border-radius:
+                var(--card-radius)
+                var(--card-radius)
+                0
+                0;
+            border: var(--card-border);
+            border-bottom: none;
+            transition:
+                transform var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
+        }
+        
         </style>
         """,
         unsafe_allow_html=True
@@ -965,8 +987,16 @@ def run(platform: str):
             # =====================================================
             # CHARTS
             # =====================================================
-            st.markdown("### 📈 Biểu đồ theo ngày")
-
+            st.markdown("""
+            <div class="kpi-card">
+                <div class="section-title">
+                    📈 Biểu đồ theo ngày
+                </div>
+                <div class="section-subtitle">
+                    Advanced order performance & revenue insights
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             with st.container(border=True):
                 chart_col1, chart_col2 = st.columns(2)
 
@@ -1062,8 +1092,16 @@ def run(platform: str):
             # =====================================================
             # TOP PRODUCTS CHART + TABLE
             # =====================================================
-            st.markdown("### 🏆 Top 10 sản phẩm theo GMV (tuần này)")
-
+            st.markdown("""
+            <div class="kpi-card">
+                <div class="section-title">
+                    🏆 Top 10 sản phẩm theo GMV (tuần này)
+                </div>
+                <div class="section-subtitle">
+                    Advanced order performance & revenue insights
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             with st.container(border=True):
 
                 # Tính tỷ trọng GMV
@@ -1512,101 +1550,119 @@ def run(platform: str):
             # =====================================================
             # CHARTS
             # =====================================================
-            st.markdown("### 📈 Biểu đồ theo ngày")
-            chart_col1, chart_col2 = st.columns(2)
 
-            with chart_col1:
-                fig_gmv = go.Figure()
-                fig_gmv.add_trace(go.Bar(
-                    x=[str(d) for d in gmv_by_day_last["date"]],
-                    y=gmv_by_day_last["gmv"],
-                    name="Tuần trước",
-                    marker_color="#FDBA74"
-                ))
-                fig_gmv.add_trace(go.Bar(
-                    x=[str(d) for d in gmv_by_day_this["date"]],
-                    y=gmv_by_day_this["gmv"],
-                    name="Tuần này",
-                    marker_color="#EE4D2D"
-                ))
-                fig_gmv.update_layout(
-                    title="GMV theo ngày",
-                    barmode="group",
-                    height=320,
-                    margin=dict(l=0, r=0, t=40, b=0),
-                    legend=dict(orientation="h", yanchor="bottom",
-                                y=1.02, xanchor="right", x=1)
-                )
-                st.plotly_chart(fig_gmv, use_container_width=True)
+            st.markdown("""
+            <div class="kpi-card">
+                <div class="section-title">
+                    📈 Biểu đồ theo ngày
+                </div>
+                <div class="section-subtitle">
+                    Advanced order performance & revenue insights
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-            with chart_col2:
-                fig_orders = go.Figure()
-                fig_orders.add_trace(go.Bar(
-                    x=[str(d) for d in orders_by_day_last["date"]],
-                    y=orders_by_day_last["orders"],
-                    name="Tuần trước",
-                    marker_color="#CBD5E1"
-                ))
-                fig_orders.add_trace(go.Bar(
-                    x=[str(d) for d in orders_by_day_this["date"]],
-                    y=orders_by_day_this["orders"],
-                    name="Tuần này",
-                    marker_color="#7C3AED"
-                ))
-                fig_orders.update_layout(
-                    title="Orders theo ngày",
-                    barmode="group",
-                    height=320,
-                    margin=dict(l=0, r=0, t=40, b=0),
-                    legend=dict(orientation="h", yanchor="bottom",
-                                y=1.02, xanchor="right", x=1)
-                )
-                st.plotly_chart(fig_orders, use_container_width=True)
+            with st.container(border=True):
+                chart_col1, chart_col2 = st.columns(2)
 
-            chart_col3, chart_col4 = st.columns(2)
+                with chart_col1:
+                    fig_gmv = go.Figure()
+                    fig_gmv.add_trace(go.Bar(
+                        x=[str(d) for d in gmv_by_day_last["date"]],
+                        y=gmv_by_day_last["gmv"],
+                        name="Tuần trước",
+                        marker_color="#FDBA74"
+                    ))
+                    fig_gmv.add_trace(go.Bar(
+                        x=[str(d) for d in gmv_by_day_this["date"]],
+                        y=gmv_by_day_this["gmv"],
+                        name="Tuần này",
+                        marker_color="#EE4D2D"
+                    ))
+                    fig_gmv.update_layout(
+                        title="GMV theo ngày",
+                        barmode="group",
+                        height=320,
+                        margin=dict(l=0, r=0, t=40, b=0),
+                        legend=dict(orientation="h", yanchor="bottom",
+                                    y=1.02, xanchor="right", x=1)
+                    )
+                    st.plotly_chart(fig_gmv, use_container_width=True)
 
-            with chart_col3:
-                fig_donut = go.Figure(data=[go.Pie(
-                    labels=["Hoàn thành", "Đã hủy"],
-                    values=[orders_this_week - orders_cancelled_this_week,
-                            orders_cancelled_this_week],
-                    hole=0.6,
-                    marker_colors=["#EE4D2D", "#FCA5A5"]
-                )])
-                fig_donut.update_layout(
-                    title=f"Cancel Rate tuần này ({cancel_rate_this_week:.1f}%)",
-                    height=300,
-                    margin=dict(l=0, r=0, t=40, b=0)
-                )
-                st.plotly_chart(fig_donut, use_container_width=True)
+                with chart_col2:
+                    fig_orders = go.Figure()
+                    fig_orders.add_trace(go.Bar(
+                        x=[str(d) for d in orders_by_day_last["date"]],
+                        y=orders_by_day_last["orders"],
+                        name="Tuần trước",
+                        marker_color="#CBD5E1"
+                    ))
+                    fig_orders.add_trace(go.Bar(
+                        x=[str(d) for d in orders_by_day_this["date"]],
+                        y=orders_by_day_this["orders"],
+                        name="Tuần này",
+                        marker_color="#7C3AED"
+                    ))
+                    fig_orders.update_layout(
+                        title="Orders theo ngày",
+                        barmode="group",
+                        height=320,
+                        margin=dict(l=0, r=0, t=40, b=0),
+                        legend=dict(orientation="h", yanchor="bottom",
+                                    y=1.02, xanchor="right", x=1)
+                    )
+                    st.plotly_chart(fig_orders, use_container_width=True)
+            with st.container(border=True):
+                chart_col3, chart_col4 = st.columns(2)
 
-            with chart_col4:
-                fig_sku = go.Figure(go.Bar(
-                    x=sku_metrics["GMV"] / 1_000_000,
-                    y=sku_metrics["SKU Category"],
-                    orientation="h",
-                    marker_color="#EE4D2D",
-                    text=[f"{v:.1f}M ({p:.1f}%)" for v, p in zip(
-                        sku_metrics["GMV"] / 1_000_000,
-                        sku_metrics["GMV_pct"]
-                    )],
-                    textposition="outside"
-                ))
-                fig_sku.update_layout(
-                    title="GMV theo SKU (triệu ₫)",
-                    height=300,
-                    margin=dict(l=0, r=120, t=40, b=0),
-                    xaxis_title="GMV (triệu ₫)",
-                    yaxis=dict(autorange="reversed")
-                )
-                st.plotly_chart(fig_sku, use_container_width=True)
+                with chart_col3:
+                    fig_donut = go.Figure(data=[go.Pie(
+                        labels=["Hoàn thành", "Đã hủy"],
+                        values=[orders_this_week - orders_cancelled_this_week,
+                                orders_cancelled_this_week],
+                        hole=0.6,
+                        marker_colors=["#EE4D2D", "#FCA5A5"]
+                    )])
+                    fig_donut.update_layout(
+                        title=f"Cancel Rate tuần này ({cancel_rate_this_week:.1f}%)",
+                        height=300,
+                        margin=dict(l=0, r=0, t=40, b=0)
+                    )
+                    st.plotly_chart(fig_donut, use_container_width=True)
+
+                with chart_col4:
+                    fig_sku = go.Figure(go.Bar(
+                        x=sku_metrics["GMV"] / 1_000_000,
+                        y=sku_metrics["SKU Category"],
+                        orientation="h",
+                        marker_color="#EE4D2D",
+                        text=[f"{v:.1f}M ({p:.1f}%)" for v, p in zip(
+                            sku_metrics["GMV"] / 1_000_000,
+                            sku_metrics["GMV_pct"]
+                        )],
+                        textposition="outside"
+                    ))
+                    fig_sku.update_layout(
+                        title="GMV theo SKU (triệu ₫)",
+                        height=300,
+                        margin=dict(l=0, r=120, t=40, b=0),
+                        xaxis_title="GMV (triệu ₫)",
+                        yaxis=dict(autorange="reversed")
+                    )
+                    st.plotly_chart(fig_sku, use_container_width=True)
 
             # =====================================================
             # SKU CARDS
             # =====================================================
+
             st.markdown("""
-            <div style="font-size:18px;font-weight:800;color:#0F172A;margin-top:8px;margin-bottom:14px;">
-                🛒 Top SKU GMV
+            <div class="kpi-card">
+                <div class="section-title">
+                    🛒 Top SKU GMV
+                </div>
+                <div class="section-subtitle">
+                    Advanced order performance & revenue insights
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1653,7 +1709,16 @@ def run(platform: str):
             # =====================================================
             df_ads = st.session_state.shoppe_ads_data
 
-            st.markdown("### 📊 Ads Performance Overview")
+            st.markdown("""
+            <div class="kpi-card">
+                <div class="section-title">
+                    📊 Ads Performance Overview
+                </div>
+                <div class="section-subtitle">
+                    Advanced order performance & revenue insights
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
             col1, col2, col3, col4, col5, col6 = st.columns(6)
 

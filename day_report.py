@@ -313,25 +313,19 @@ def run(platform: str):
     CHART HEADER
     ===================================================== */
     .chart-header {
-
         background: var(--card-bg);
-
         padding:
             24px
             24px 
             12px
             24px;
-
         border-radius:
             var(--card-radius)
             var(--card-radius)
             0
             0;
-
         border: var(--card-border);
-
         border-bottom: none;
-
         transition:
             transform var(--transition-speed) ease,
             box-shadow var(--transition-speed) ease;
@@ -403,8 +397,6 @@ def run(platform: str):
 
         box-shadow: var(--card-hover-shadow);
     }
-
-
     </style>
     """, unsafe_allow_html=True)
 
@@ -860,7 +852,6 @@ def run(platform: str):
                 <div class="section-subtitle">
                     Advanced order performance & revenue insights
                 </div>
-
             </div>
             """, unsafe_allow_html=True)
 
@@ -1839,7 +1830,6 @@ def run(platform: str):
                 <div class="section-subtitle">
                     Detailed Shopee order tracking table
                 </div>
-
             </div>
             """, unsafe_allow_html=True)
 
