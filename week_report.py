@@ -12,9 +12,27 @@ sys.path.append(os.path.abspath("."))
 
 
 def run(platform: str):
+
     def read_file_tiktok(file_obj):
-        df = pd.read_csv(file_obj, dtype={
-            'Order ID': str, 'SKU ID': str, 'Tracking ID': str, 'Package ID': str})
+        dtype_dict = {
+            "Order ID": str,
+            "SKU ID": str,
+            "Tracking ID": str,
+            "Package ID": str,
+        }
+
+        file_name = file_obj.name.lower()
+
+        if file_name.endswith(".csv"):
+            df = pd.read_csv(file_obj, dtype=dtype_dict)
+
+        elif file_name.endswith(".xlsx"):
+            df = pd.read_excel(file_obj, dtype=dtype_dict)
+
+        else:
+            raise ValueError(
+                "Unsupported file format. Please upload CSV or XLSX.")
+
         return df
 
     def read_file_shopee(file_obj):
@@ -621,16 +639,21 @@ def run(platform: str):
         </div>
         """, unsafe_allow_html=True)
 
-        # Upload file
         uploaded_file = st.sidebar.file_uploader(
-            "Upload File Tiktok (CSV) At Here", type="csv", key="csv_upload_sidebar"
+            "Upload TikTok File (CSV/XLSX)",
+            type=["csv", "xlsx"],
+            key="file_upload_sidebar",
         )
 
         if uploaded_file:
-            st.sidebar.success("CSV Uploaded!")
+            st.sidebar.success(f"{uploaded_file.name} uploaded!")
+
             if st.sidebar.button("Check GMV Now"):
-                df = read_file_tiktok(uploaded_file)
-                st.session_state.df = df
+                try:
+                    df = read_file_tiktok(uploaded_file)
+                    st.session_state.df = df
+                except Exception as e:
+                    st.sidebar.error(f"Cannot read file: {e}")
 
         if "df" in st.session_state:
             # get data
