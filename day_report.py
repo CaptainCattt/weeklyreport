@@ -777,7 +777,7 @@ def run(platform: str):
             st.markdown("<div style='height:25px'></div>",
                         unsafe_allow_html=True)
 
-            col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 2, 2])
+            col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1.5, 1.5])
 
             with col1:
                 st.markdown(
