@@ -713,12 +713,14 @@ def run(platform: str):
 
         # 3️⃣ GMV ước tính
         if 'SKU Subtotal After Discount' in df.columns and 'SKU Platform Discount' in df.columns:
+            gmv = df['Order Amount'].sum()
             # Chỉ lấy các đơn không bị hủy
             df_valid = df[df["Order Status"] != 'Cancelled']
             nmv = df_valid['Order Amount'].sum()
 
         else:
             nmv = None
+            gmv = None
 
         # 4️⃣ % đơn theo SKU
         sku_counts = df.groupby('SKU Category')['Order ID'].nunique()
@@ -737,6 +739,7 @@ def run(platform: str):
         return {
             "total_orders": total_orders,
             "canceled_orders": canceled_orders,
+            "gmv": gmv,
             "nmv": nmv,
             "sku_percent": sku_percent,
             "region_percent": region_percent,
@@ -774,7 +777,7 @@ def run(platform: str):
             st.markdown("<div style='height:25px'></div>",
                         unsafe_allow_html=True)
 
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
 
             with col1:
                 st.markdown(
@@ -828,7 +831,21 @@ def run(platform: str):
                 st.markdown(
                     f"""
                     <div class="kpi-card">
-                        <div class="kpi-title">💰 NMV ước tính</div>
+                        <div class="kpi-title">💰 GMV ước tính</div>
+                        <div class="kpi-value" style="color:#2563EB">{kpi['gmv']:,.0f}₫</div>
+                        <div class="metric-tag-blue">
+                        Revenue
+                    </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            with col5:
+                st.markdown(
+                    f"""
+                    <div class="kpi-card">
+                        <div class="kpi-title">💵 NMV ước tính</div>
                         <div class="kpi-value" style="color:#0F766E">{kpi['nmv']:,.0f}₫</div>
                         <div class="metric-tag-green">
                         Revenue prediction
@@ -844,16 +861,6 @@ def run(platform: str):
             # =====================================================
             # DETAIL ANALYTICS SECTION
             # =====================================================
-            st.markdown("""
-            <div class="section-card">
-                <div class="section-title">
-                    📊 Detail Analytics
-                </div>
-                <div class="section-subtitle">
-                    Advanced order performance & revenue insights
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
 
             # =====================================================
             # DATE PROCESSING

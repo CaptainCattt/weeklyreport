@@ -43,6 +43,7 @@ with st.sidebar:
             del st.session_state[key]
 
         st.rerun()
+
     st.markdown("---")
     st.markdown("""
     <div style="
@@ -55,18 +56,47 @@ with st.sidebar:
         🧰 Công cụ
     </div>
     """, unsafe_allow_html=True)
+
     cola, colb = st.columns(2)
+
     with cola:
-        if st.button("📅 Order Report", use_container_width=True, key="sb_order",
-                     type="primary" if st.session_state.active_tool == "order" else "secondary"):
+        if st.button(
+            "📊 Daily Report",
+            use_container_width=True,
+            key="sb_order",
+            type="primary" if st.session_state.active_tool == "order" else "secondary",
+        ):
             st.session_state.active_tool = "order"
             st.rerun()
 
     with colb:
-        if st.button("📈 Week Report", use_container_width=True, key="sb_week",
-                     type="primary" if st.session_state.active_tool == "week" else "secondary"):
+        if st.button(
+            "📈 Weekly Report",
+            use_container_width=True,
+            key="sb_week",
+            type="primary" if st.session_state.active_tool == "week" else "secondary",
+        ):
             st.session_state.active_tool = "week"
             st.rerun()
+
+    # Hàng thứ 2
+    if st.button(
+        "📅 Monthly Report",
+        use_container_width=True,
+        key="sb_month",
+        type="primary" if st.session_state.active_tool == "month" else "secondary",
+    ):
+        st.session_state.active_tool = "month"
+        st.rerun()
+
+    if st.button(
+        "📑 Tracking traffic",
+        use_container_width=True,
+        key="sb_tracking",
+        type="primary" if st.session_state.active_tool == "tracking" else "secondary",
+    ):
+        st.session_state.active_tool = "tracking"
+        st.rerun()
 
     st.markdown("---")
 
@@ -111,6 +141,14 @@ if st.session_state.active_tool == "order":
 elif st.session_state.active_tool == "week":
     import week_report
     week_report.run(platform=st.session_state.platform)
+
+elif st.session_state.active_tool == "month":
+    import month_report
+    month_report.run(platform=st.session_state.platform)
+
+elif st.session_state.active_tool == "tracking":
+    import tracking
+    tracking.run(platform=st.session_state.platform)
 
 else:
     st.markdown("<div style='height: 80px'></div>", unsafe_allow_html=True)
