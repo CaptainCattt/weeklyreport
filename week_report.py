@@ -289,8 +289,9 @@ def run(platform: str):
         # process data
         df_tt = process_tiktok_data(df)
 
-        df_tt["Created Time"] = pd.to_datetime(
-            df_tt["Created Time"],
+        df["Created Time"] = pd.to_datetime(
+            df["Created Time"].astype(str).str.strip(),
+            dayfirst=True,
             errors="coerce"
         )
         # =========================
@@ -1348,7 +1349,6 @@ def run(platform: str):
                        aov_last_week * 100) if aov_last_week != 0 else 0
             wow_cancelled = ((orders_cancelled_this_week - orders_cancelled_last_week) /
                              orders_cancelled_last_week * 100) if orders_cancelled_last_week != 0 else 0
-            cancel_rate_delta = cancel_rate_this_week - cancel_rate_last_week
             nmv_rate_delta = nmv_rate_this_week - nmv_rate_last_week
 
             # =====================================================
