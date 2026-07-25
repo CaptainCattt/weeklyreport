@@ -746,8 +746,26 @@ def run(platform: str):
             "cancel_rate": cancel_rate
         }
 
-    def flow1(file_obj):
-        df = pd.read_csv(file_obj)
+    def read_file_tiktok(file_obj):
+        dtype_dict = {
+            "Order ID": str,
+            "SKU ID": str,
+            "Tracking ID": str,
+            "Package ID": str,
+        }
+
+        file_name = file_obj.name.lower()
+
+        if file_name.endswith(".csv"):
+            df = pd.read_csv(file_obj, dtype=dtype_dict)
+
+        elif file_name.endswith(".xlsx"):
+            df = pd.read_excel(file_obj, dtype=dtype_dict)
+
+        else:
+            raise ValueError(
+                "Unsupported file format. Please upload CSV or XLSX.")
+
         return df
 
     def flow2(file_obj):
@@ -756,13 +774,13 @@ def run(platform: str):
 
     if platform == "TikTok":
         uploaded_file = st.sidebar.file_uploader(
-            "Upload File Tiktok (CSV) At Here", type="csv", key="csv_upload_sidebar"
+            "Upload File Tiktok (CSV/XLSX) At Here", type=["csv", "xlsx"], key="csv_upload_sidebar"
         )
 
         if uploaded_file:
             st.sidebar.success("CSV Uploaded!")
             if st.sidebar.button("Check GMV Now"):
-                df = flow1(uploaded_file)
+                df = read_file_tiktok(uploaded_file)
                 set_latest_df(df, "df_latest")
                 st.session_state["flow_name"] = "Flow 1 Result"
 
