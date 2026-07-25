@@ -108,6 +108,11 @@ def process_tracking_data(df):
     return tracking_df
 
 
+def read_file_tracking_sp(file_obj):
+    df = pd.read_excel(file_obj)
+    return df
+
+
 def run(platform: str):
 
     if platform == "TikTok":
@@ -120,7 +125,7 @@ def run(platform: str):
                 color:#111;
                 margin-bottom:5px;
             ">
-                📑 Daily Tracking
+                📑 Daily Tracking Tiktok
             </h1>
             <p style="
                 color:#6B7280;
@@ -217,14 +222,95 @@ def run(platform: str):
 
                 with result_box:
                     st.success("✅ Dữ liệu đã được ghi vào Google Sheet!")
+
     elif platform == "Shopee":
+
         st.markdown("""
-        <div style="
-            font-size: 16px;
-            font-weight: 400;
-            padding-left: 12px;
-            margin-bottom: 12px;
-        ">
-            Dữ liệu traffic từ Shopee
+        <div style="text-align:center; margin-bottom:20px;">
+            <h1 style="
+                font-size:38px;
+                font-weight:800;
+                color:#111;
+                margin-bottom:5px;
+            ">
+                📑 Daily Tracking Shopee
+            </h1>
+            <p style="
+                color:#6B7280;
+                font-size:15px;
+                margin-top:0;
+            ">
+                Tracking weekly revenue, orders, ads performance and livestream efficiency
+            </p>
         </div>
         """, unsafe_allow_html=True)
+
+        uploaded_file_sp = st.sidebar.file_uploader(
+            "Upload File Shopee (XLSX) At Here", type="xlsx", key="xlsx_upload_sidebar"
+        )
+
+        if uploaded_file_sp:
+            st.sidebar.success("File Uploaded!")
+            if st.sidebar.button("Check GMV Now"):
+                df_sp = read_file_tracking_sp(uploaded_file_sp)
+                st.session_state.df_sp = df_sp
+
+        if "df_sp" in st.session_state:
+            df_sp = st.session_state["df_sp"].copy()
+            result_box = st.empty()
+            tracking_dfsp_view = df_sp[
+                [
+                    "Ngày",
+                    "Tổng số đơn hàng",
+                    "Tổng doanh số (VND)",
+                    "Doanh số đơn hủy",
+                    "Tỷ lệ chuyển đổi đơn hàng",
+                    "Doanh số trên mỗi đơn hàng",
+                    "Số lượt truy cập",
+                    "Lượt nhấp vào sản phẩm",
+                    "số người mua",
+                    "số người mua mới",
+                    "số người mua tiềm năng",
+                    "Tỉ lệ quay lại của người mua"
+                ]
+            ]
+            tracking_dfsp_view["Ngày"] = tracking_dfsp_view["Ngày"].str[:10]
+
+            df_final_sp = tracking_dfsp_view.iloc[[0]].copy()
+            st.dataframe(df_final_sp, use_container_width=True)
+            fill_ggsheet_sp = df_final_sp
+            st.session_state["fill_ggsheet_sp"] = (fill_ggsheet_sp)
+
+            if st.button("📤 Ghi dữ liệu doanh thu vào Google Sheet"):
+                with result_box:
+                    with st.spinner("⏳ Đang ghi dữ liệu..."):
+                        spreadsheet = client.open_by_url(
+                            "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
+                        )
+                        worksheet_sp = spreadsheet.worksheet("Shopee")
+                        existing_data_sp = worksheet_sp.get_all_values()
+                        next_row_index = None
+                        for i in range(1, len(existing_data_sp)):
+                            if all(cell.strip() == "" for cell in existing_data_sp[i]):
+                                next_row_index = i + 1
+                                break
+                        if next_row_index is None:
+                            next_row_index = len(existing_data_sp) + 1
+
+                        from gspread_dataframe import set_with_dataframe
+                        df_to_write = pd.DataFrame([{
+                            col: clean_value(val)
+                            for col, val in zip(
+                                st.session_state["fill_ggsheet_sp"].columns,
+                                st.session_state["fill_ggsheet_sp"].iloc[0]
+                            )
+                        }])
+
+                        set_with_dataframe(
+                            worksheet_sp, df_to_write,
+                            row=next_row_index,
+                            include_column_header=False
+                        )
+
+                with result_box:
+                    st.success("✅ Dữ liệu đã được ghi vào Google Sheet!")

@@ -98,6 +98,15 @@ with st.sidebar:
         st.session_state.active_tool = "tracking"
         st.rerun()
 
+    if st.button(
+        "📑 Checking KOC",
+        use_container_width=True,
+        key="sb_checking",
+        type="primary" if st.session_state.active_tool == "checking" else "secondary",
+    ):
+        st.session_state.active_tool = "checking"
+        st.rerun()
+
     st.markdown("---")
 
     st.markdown("""
@@ -149,6 +158,10 @@ elif st.session_state.active_tool == "month":
 elif st.session_state.active_tool == "tracking":
     import tracking
     tracking.run(platform=st.session_state.platform)
+
+elif st.session_state.active_tool == "checking":
+    import checking_KOC
+    checking_KOC.run(platform=st.session_state.platform)
 
 else:
     st.markdown("<div style='height: 80px'></div>", unsafe_allow_html=True)
