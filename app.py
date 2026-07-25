@@ -89,6 +89,18 @@ with st.sidebar:
         st.session_state.active_tool = "month"
         st.rerun()
 
+    st.markdown("""
+        <div style="
+            font-size: 22px;
+            font-weight: 700;
+            border-left: 6px solid #FFA500;
+            padding-left: 12px;
+            margin-bottom: 16px;
+        ">
+            📑 Tracking
+        </div>
+        """, unsafe_allow_html=True)
+
     if st.button(
         "📑 Tracking traffic",
         use_container_width=True,
