@@ -195,7 +195,7 @@ def run(platform: str):
                         spreadsheet = client.open_by_url(
                             "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
                         )
-                        worksheet = spreadsheet.worksheet("Tiktok")
+                        worksheet = spreadsheet.worksheet("1. Analyst Tiktok")
                         existing_data = worksheet.get_all_values()
                         next_row_index = None
                         for i in range(1, len(existing_data)):
@@ -287,7 +287,8 @@ def run(platform: str):
                         spreadsheet = client.open_by_url(
                             "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
                         )
-                        worksheet_sp = spreadsheet.worksheet("Shopee")
+                        worksheet_sp = spreadsheet.worksheet(
+                            "2. Analyst Shopee")
                         existing_data_sp = worksheet_sp.get_all_values()
                         next_row_index = None
                         for i in range(1, len(existing_data_sp)):
