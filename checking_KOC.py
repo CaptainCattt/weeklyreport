@@ -134,7 +134,7 @@ def run(platform: str):
         if "df" in st.session_state:
 
             df = st.session_state["df"].copy()
-
+            result_box = st.empty()
             df.rename(
                 columns={
                     "Est. Commission Base": "GMV",

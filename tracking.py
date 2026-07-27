@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import sys
+import numpy as np
 import os
 # ... các import khác
 # Setting API
@@ -105,6 +106,15 @@ def process_tracking_data(df):
         tracking_df["Conversion rate"],
         errors="coerce"
     ).round(4)
+    tracking_df["Product clicks"] = pd.to_numeric(
+        tracking_df["Product clicks"],
+        errors="coerce"
+    )
+
+    tracking_df["Product impressions"] = pd.to_numeric(
+        tracking_df["Product impressions"],
+        errors="coerce"
+    )
     return tracking_df
 
 
@@ -160,7 +170,12 @@ def run(platform: str):
             date = st.session_state["date"]
             result_box = st.empty()
             tracking_df = process_tracking_data(df)
-
+            tracking_df["CTR"] = np.where(
+                tracking_df["Product impressions"] > 0,
+                tracking_df["Product clicks"] /
+                tracking_df["Product impressions"],
+                0
+            )
             tracking_df_view = tracking_df[
                 [
                     "Orders",
@@ -173,6 +188,7 @@ def run(platform: str):
                     "Product clicks",
                     "Unique clicks",
                     "Visitors",
+                    "CTR",
                     "Creator LIVE-attributed GMV",
                     "Linked account LIVE-attributed GMV",
                     "Creator video-attributed GMV",
