@@ -255,7 +255,7 @@ def run(platform: str):
                 video_df,
                 left_on=["Content ID", "Creator Username"],
                 right_on=["Video ID", "Creator name"],
-                how="outer"
+                how="inner"
             )
 
             df_merged_final = df_merged[
