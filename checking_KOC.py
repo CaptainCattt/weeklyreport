@@ -70,6 +70,27 @@ def read_file_checking_tt(file_obj):
     return df
 
 
+def read_file_video_tt(file_obj):
+    dtype_dict = {
+        "Video ID": str,
+        "Creator name": str,
+    }
+    file_name = file_obj.name.lower()
+
+    if file_name.endswith(".csv"):
+        # bỏ dòng thứ 2 của file
+        df = pd.read_csv(file_obj, skiprows=[1], dtype=dtype_dict)
+
+    elif file_name.endswith(".xlsx"):
+        # bỏ dòng thứ 2 của file
+        df = pd.read_excel(file_obj, skiprows=[1], dtype=dtype_dict)
+
+    else:
+        raise ValueError("Unsupported file format. Please upload CSV or XLSX.")
+
+    return df
+
+
 def process_checking_data(df):
     checking_df = df.copy()
 
@@ -121,19 +142,28 @@ def run(platform: str):
             key="file_upload_sidebar",
         )
 
-        if uploaded_file:
+        video_file = st.sidebar.file_uploader(
+            "Upload TikTok Video File (CSV/XLSX)",
+            type=["csv", "xlsx"],
+            key="video_file_upload_sidebar",
+        )
+
+        if uploaded_file and video_file:
             st.sidebar.success(f"{uploaded_file.name} uploaded!")
 
             if st.sidebar.button("Check GMV Now"):
                 try:
                     df = read_file_checking_tt(uploaded_file)
+                    video_df = read_file_video_tt(video_file)
                     st.session_state.df = df
+                    st.session_state.video_df = video_df
                 except Exception as e:
                     st.sidebar.error(f"Cannot read file: {e}")
 
-        if "df" in st.session_state:
+        if "df" in st.session_state and "video_df" in st.session_state:
 
             df = st.session_state["df"].copy()
+            video_df = st.session_state["video_df"].copy()
             result_box = st.empty()
             df.rename(
                 columns={
@@ -150,7 +180,6 @@ def run(platform: str):
                     "Creator Username",
                     "GMV",
                     "Commission",
-                    "Seller SKU",
                     "Content Type",
                     "Content ID",
                     "Order Status"
@@ -158,6 +187,27 @@ def run(platform: str):
             ]
 
             tracking_df = process_checking_data(df_view)
+
+            video_df = video_df[
+                [
+                    "Video ID",
+                    "Creator name",
+                    "Creator video-attributed GMV",
+                    "Video-attributed orders",
+                    "AOV",
+                    "Likes",
+                    "Comments",
+                    "Shares",
+                    "Video product impressions",
+                    "Video product clicks",
+                    "Completion rate",
+                    "Video views",
+                    "CTR",
+                    "Video GPM",
+                    "Engagement",
+                    "Avg. GMV per customer"
+                ]
+            ]
 
             # Chọn KOC
             creator_list = sorted(
@@ -200,10 +250,41 @@ def run(platform: str):
                 )
             )
 
-            st.dataframe(summary_df, use_container_width=True)
+            df_merged = pd.merge(
+                summary_df,
+                video_df,
+                left_on=["Content ID", "Creator Username"],
+                right_on=["Video ID", "Creator name"],
+                how="outer"
+            )
 
-            fill_ggsheet = df_final
-            st.session_state["fill_ggsheet"] = (fill_ggsheet)
+            df_merged_final = df_merged[
+                [
+                    "Time Created",
+                    "Creator Username",
+                    "Content Type",
+                    "Content ID",
+                    "Orders",
+                    "GMV",
+                    "Commission",
+                    "Creator name",
+                    "AOV",
+                    "Likes",
+                    "Comments",
+                    "Shares",
+                    "Video product impressions",
+                    "Video product clicks",
+                    "Completion rate",
+                    "Video views",
+                    "CTR",
+                    "Video GPM",
+                    "Engagement",
+                ]
+            ]
+
+            st.dataframe(df_merged_final, use_container_width=True)
+
+            st.session_state["fill_ggsheet"] = df_merged_final.copy()
 
             if st.button("📤 Ghi dữ liệu doanh thu vào Google Sheet"):
                 with result_box:
@@ -211,33 +292,30 @@ def run(platform: str):
                         spreadsheet = client.open_by_url(
                             "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
                         )
-                        worksheet = spreadsheet.worksheet("Tiktok")
-                        existing_data = worksheet.get_all_values()
-                        next_row_index = None
-                        for i in range(1, len(existing_data)):
-                            if all(cell.strip() == "" for cell in existing_data[i]):
-                                next_row_index = i + 1
-                                break
-                        if next_row_index is None:
-                            next_row_index = len(existing_data) + 1
+                        worksheet = spreadsheet.worksheet(
+                            "7. Tracking Booking KOC")
+
+                        # Dòng tiếp theo để ghi
+                        next_row_index = len(worksheet.get_all_values()) + 1
 
                         from gspread_dataframe import set_with_dataframe
-                        df_to_write = pd.DataFrame([{
-                            col: clean_value(val)
-                            for col, val in zip(
-                                st.session_state["fill_ggsheet"].columns,
-                                st.session_state["fill_ggsheet"].iloc[0]
-                            )
-                        }])
+
+                        df_to_write = st.session_state["fill_ggsheet"].copy()
+
+                        # Làm sạch dữ liệu
+                        df_to_write = df_to_write.map(clean_value)
 
                         set_with_dataframe(
-                            worksheet, df_to_write,
+                            worksheet,
+                            df_to_write,
                             row=next_row_index,
-                            include_column_header=False
+                            include_column_header=False,
+                            resize=False,
                         )
 
                 with result_box:
-                    st.success("✅ Dữ liệu đã được ghi vào Google Sheet!")
+                    st.success(
+                        f"✅ Đã ghi {len(df_to_write)} dòng vào Google Sheet!")
 
     elif platform == "Shopee":
 
