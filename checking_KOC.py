@@ -149,7 +149,8 @@ def run(platform: str):
         )
 
         if uploaded_file and video_file:
-            st.sidebar.success(f"{uploaded_file.name} uploaded!")
+            st.sidebar.success(
+                f"{uploaded_file.name} uploaded! and {video_file.name} uploaded!")
 
             if st.sidebar.button("Check GMV Now"):
                 try:
@@ -192,7 +193,7 @@ def run(platform: str):
                 [
                     "Video ID",
                     "Creator name",
-                    "Creator video-attributed GMV",
+                    "Affiliate video-attributed GMV",
                     "Video-attributed orders",
                     "AOV",
                     "Likes",
