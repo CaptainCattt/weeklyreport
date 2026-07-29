@@ -119,6 +119,15 @@ with st.sidebar:
         st.session_state.active_tool = "checking"
         st.rerun()
 
+    if st.button(
+        "📑 Checking LIVE",
+        use_container_width=True,
+        key="sb_checking_live",
+        type="primary" if st.session_state.active_tool == "checking_live" else "secondary",
+    ):
+        st.session_state.active_tool = "checking_live"
+        st.rerun()
+
     st.markdown("---")
 
     st.markdown("""
@@ -174,6 +183,11 @@ elif st.session_state.active_tool == "tracking":
 elif st.session_state.active_tool == "checking":
     import checking_KOC
     checking_KOC.run(platform=st.session_state.platform)
+
+elif st.session_state.active_tool == "checking_live":
+    import checking_live
+    checking_live.run(platform=st.session_state.platform)
+
 
 else:
     st.markdown("<div style='height: 80px'></div>", unsafe_allow_html=True)
