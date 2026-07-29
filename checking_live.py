@@ -261,7 +261,7 @@ def run(platform: str):
 
             </style>
             """, unsafe_allow_html=True)
-            col1, col2, col3, col4, col5, col6 = st.columns(6)
+            col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 2, 1, 1, 1])
 
             col1.metric("📦 Orders", summary_df["Orders"].sum())
 
