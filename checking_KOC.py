@@ -1,3 +1,4 @@
+from google_sheets import GOOGLE_SHEETS
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -10,7 +11,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 sys.path.append(os.path.abspath("."))
-
 ######## FUNCTONS ##########
 try:
     creds_info = st.secrets["google"]
@@ -152,7 +152,7 @@ def run(platform: str):
             st.sidebar.success(
                 f"{uploaded_file.name} uploaded! and {video_file.name} uploaded!")
 
-            if st.sidebar.button("Check GMV Now"):
+            if st.sidebar.button("Check Now"):
                 try:
                     df = read_file_checking_tt(uploaded_file)
                     video_df = read_file_video_tt(video_file)
@@ -166,6 +166,11 @@ def run(platform: str):
             df = st.session_state["df"].copy()
             video_df = st.session_state["video_df"].copy()
             result_box = st.empty()
+
+            # =========================================================
+            # 1. CLEAN ORDER DATA
+            # =========================================================
+
             df.rename(
                 columns={
                     "Est. Commission Base": "GMV",
@@ -185,9 +190,13 @@ def run(platform: str):
                     "Content ID",
                     "Order Status"
                 ]
-            ]
+            ].copy()
 
             tracking_df = process_checking_data(df_view)
+
+            # =========================================================
+            # 2. CLEAN VIDEO DATA
+            # =========================================================
 
             video_df = video_df[
                 [
@@ -208,11 +217,90 @@ def run(platform: str):
                     "Engagement",
                     "Avg. GMV per customer"
                 ]
-            ]
+            ].copy()
 
-            # Chọn KOC
+            # =========================================================
+            # 3. CHUẨN HÓA DATA TYPE
+            # =========================================================
+
+            tracking_df["Content ID"] = (
+                tracking_df["Content ID"]
+                .astype(str)
+                .str.strip()
+            )
+
+            tracking_df["Creator Username"] = (
+                tracking_df["Creator Username"]
+                .astype(str)
+                .str.strip()
+            )
+
+            video_df["Video ID"] = (
+                video_df["Video ID"]
+                .astype(str)
+                .str.strip()
+            )
+
+            video_df["Creator name"] = (
+                video_df["Creator name"]
+                .astype(str)
+                .str.strip()
+            )
+
+            # =========================================================
+            # 4. TỔNG HỢP ORDER
+            # =========================================================
+
+            summary_df = (
+                tracking_df
+                .groupby(
+                    [
+                        "Time Created",
+                        "Creator Username",
+                        "Content Type",
+                        "Content ID"
+                    ],
+                    as_index=False
+                )
+                .agg(
+                    Orders=("Order ID", "nunique"),
+                    GMV=("GMV", "sum"),
+                    Commission=("Commission", "sum")
+                )
+            )
+
+            # =========================================================
+            # 5. MERGE ORDER + VIDEO
+            # =========================================================
+            #
+            # Dùng LEFT JOIN thay vì OUTER
+            # vì summary_df là bảng chính.
+            #
+            # Mỗi dòng = 1 ngày + 1 creator + 1 content
+            #
+
+            df_merged = pd.merge(
+                summary_df,
+                video_df,
+                left_on=[
+                    "Content ID",
+                    "Creator Username"
+                ],
+                right_on=[
+                    "Video ID",
+                    "Creator name"
+                ],
+                how="right"
+            )
+
+            # =========================================================
+            # 6. CHỌN KOC
+            # =========================================================
+
             creator_list = sorted(
-                tracking_df["Creator Username"].dropna().unique()
+                df_merged["Creator name"]
+                .dropna()
+                .unique()
             )
 
             selected_creators = st.multiselect(
@@ -221,78 +309,62 @@ def run(platform: str):
                 default=creator_list
             )
 
-            # Lọc KOC
+            # =========================================================
+            # 7. FILTER SAU KHI MERGE
+            # =========================================================
+
             if selected_creators:
-                df_final = tracking_df[
-                    tracking_df["Creator Username"].isin(selected_creators)
-                ]
+
+                df_merged_final = df_merged[
+                    df_merged["Creator name"].isin(selected_creators)
+                ].copy()
+
             else:
-                df_final = tracking_df.copy()
 
-            # Tổng hợp theo ngày + Creator + Content
-            summary_df = (
-                df_final.groupby(
-                    [
-                        "Time Created",
-                        "Creator Username",
-                        "Content Type",
-                        "Content ID",
-                    ],
-                    as_index=False
-                )
-                .agg(
-                    Orders=("Order ID", "nunique"),
-                    GMV=("GMV", "sum"),
-                    Commission=("Commission", "sum"),
-                )
-                .sort_values(
-                    ["Time Created", "Creator Username"],
-                    ascending=[False, True]
-                )
+                df_merged_final = df_merged.copy()
+
+            # =========================================================
+            # 8. SELECT COLUMN HIỂN THỊ
+            # =========================================================
+
+            df_merged_final = df_merged_final[[
+                "Time Created",
+                "Creator Username",
+                "Content Type",
+                "Content ID",
+                "Orders",
+                "GMV",
+                "Commission",
+                "Creator name",
+                "AOV",
+                "Likes",
+                "Comments",
+                "Shares",
+                "Video product impressions",
+                "Video product clicks",
+                "Completion rate",
+                "Video views",
+                "CTR",
+                "Video GPM",
+                "Engagement",
+            ]]
+
+            # =========================================================
+            # 10. DISPLAY
+            # =========================================================
+
+            st.dataframe(
+                df_merged_final,
+                use_container_width=True,
+                hide_index=True
             )
-
-            df_merged = pd.merge(
-                summary_df,
-                video_df,
-                left_on=["Content ID", "Creator Username"],
-                right_on=["Video ID", "Creator name"],
-                how="inner"
-            )
-
-            df_merged_final = df_merged[
-                [
-                    "Time Created",
-                    "Creator Username",
-                    "Content Type",
-                    "Content ID",
-                    "Orders",
-                    "GMV",
-                    "Commission",
-                    "Creator name",
-                    "AOV",
-                    "Likes",
-                    "Comments",
-                    "Shares",
-                    "Video product impressions",
-                    "Video product clicks",
-                    "Completion rate",
-                    "Video views",
-                    "CTR",
-                    "Video GPM",
-                    "Engagement",
-                ]
-            ]
-
-            st.dataframe(df_merged_final, use_container_width=True)
 
             st.session_state["fill_ggsheet"] = df_merged_final.copy()
 
             if st.button("📤 Ghi dữ liệu doanh thu vào Google Sheet"):
                 with result_box:
                     with st.spinner("⏳ Đang ghi dữ liệu..."):
-                        spreadsheet = client.open_by_url(
-                            "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
-                        )
+                        spreadsheet = client.open_by_url(GOOGLE_SHEETS)
                         worksheet = spreadsheet.worksheet(
                             "7. Tracking Booking KOC")
 

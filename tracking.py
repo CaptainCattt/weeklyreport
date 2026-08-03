@@ -1,3 +1,4 @@
+from google_sheets import GOOGLE_SHEETS
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -11,7 +12,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 sys.path.append(os.path.abspath("."))
-
 ######## FUNCTONS ##########
 try:
     creds_info = st.secrets["google"]
@@ -156,7 +156,7 @@ def run(platform: str):
         if uploaded_file:
             st.sidebar.success(f"{uploaded_file.name} uploaded!")
 
-            if st.sidebar.button("Check GMV Now"):
+            if st.sidebar.button("Check Now"):
                 try:
                     df, date = read_file_tracking_tt(uploaded_file)
                     st.session_state.df = df
@@ -208,9 +208,7 @@ def run(platform: str):
             if st.button("📤 Ghi dữ liệu doanh thu vào Google Sheet"):
                 with result_box:
                     with st.spinner("⏳ Đang ghi dữ liệu..."):
-                        spreadsheet = client.open_by_url(
-                            "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
-                        )
+                        spreadsheet = client.open_by_url(GOOGLE_SHEETS)
                         worksheet = spreadsheet.worksheet("1. Analyst Tiktok")
                         existing_data = worksheet.get_all_values()
                         next_row_index = None
@@ -300,9 +298,7 @@ def run(platform: str):
             if st.button("📤 Ghi dữ liệu doanh thu vào Google Sheet"):
                 with result_box:
                     with st.spinner("⏳ Đang ghi dữ liệu..."):
-                        spreadsheet = client.open_by_url(
-                            "https://docs.google.com/spreadsheets/d/1U2jeDMar2RgqwX3yMGv1C4aESvTdP3fAq8wPVW4NWuE/edit?usp=sharing"
-                        )
+                        spreadsheet = client.open_by_url(GOOGLE_SHEETS)
                         worksheet_sp = spreadsheet.worksheet(
                             "2. Analyst Shopee")
                         existing_data_sp = worksheet_sp.get_all_values()

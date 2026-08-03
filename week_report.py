@@ -649,18 +649,18 @@ def run(platform: str):
         if uploaded_file:
             st.sidebar.success(f"{uploaded_file.name} uploaded!")
 
-            if st.sidebar.button("Check GMV Now"):
+            if st.sidebar.button("Check Now"):
                 try:
-                    df = read_file_tiktok(uploaded_file)
-                    st.session_state.df = df
+                    df_week = read_file_tiktok(uploaded_file)
+                    st.session_state.df_week = df_week
                 except Exception as e:
                     st.sidebar.error(f"Cannot read file: {e}")
 
-        if "df" in st.session_state:
+        if "df_week" in st.session_state:
             # get data
-            df = st.session_state["df"]
+            df_week = st.session_state["df_week"]
             df_this_week_tt, df_last_week_tt, current_tt, previous_tt = kpi_tiktok(
-                df)
+                df_week)
 
             # handle logic date
 

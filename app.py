@@ -6,6 +6,23 @@ st.set_page_config(
     layout="wide"
 )
 
+
+def clear_page_data():
+    keys_to_remove = [
+        "df",
+        "date",
+        "summary_df",
+        "orders",
+        "income",
+        "creator_df",
+        "live_df",
+        "report_df",
+    ]
+
+    for key in keys_to_remove:
+        st.session_state.pop(key, None)
+
+
 # ─── CSS CHUNG ────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -107,6 +124,7 @@ with st.sidebar:
         key="sb_tracking",
         type="primary" if st.session_state.active_tool == "tracking" else "secondary",
     ):
+        clear_page_data()
         st.session_state.active_tool = "tracking"
         st.rerun()
 
@@ -116,6 +134,7 @@ with st.sidebar:
         key="sb_checking",
         type="primary" if st.session_state.active_tool == "checking" else "secondary",
     ):
+        clear_page_data()
         st.session_state.active_tool = "checking"
         st.rerun()
 
@@ -125,6 +144,7 @@ with st.sidebar:
         key="sb_checking_live",
         type="primary" if st.session_state.active_tool == "checking_live" else "secondary",
     ):
+        clear_page_data()
         st.session_state.active_tool = "checking_live"
         st.rerun()
 

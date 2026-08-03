@@ -706,8 +706,9 @@ def run(platform: str):
         total_orders = df['Order ID'].nunique()
 
         # 2️⃣ Số đơn đã hủy
-        canceled_orders = df[df['Order Status']
-                             == 'Cancelled']['Order ID'].nunique()
+        canceled_orders = df[
+            df["Order Status"].isin(["Cancelled", "Canceled"])
+        ]["Order ID"].nunique()
 
         cancel_rate = canceled_orders / total_orders
 
@@ -779,18 +780,18 @@ def run(platform: str):
 
         if uploaded_file:
             st.sidebar.success("CSV Uploaded!")
-            if st.sidebar.button("Check GMV Now"):
-                df = read_file_tiktok(uploaded_file)
-                set_latest_df(df, "df_latest")
+            if st.sidebar.button("Check Now"):
+                df_day = read_file_tiktok(uploaded_file)
+                set_latest_df(df_day, "df_latest")
                 st.session_state["flow_name"] = "Flow 1 Result"
 
         # ==============================
         # UI CHÍNH
         # ==============================
         if "df_latest" in st.session_state:
-            df = st.session_state["df_latest"]
-            df = process_data(df)
-            kpi = compute_kpi(df)
+            df_day = st.session_state["df_latest"]
+            df_day = process_data(df_day)
+            kpi = compute_kpi(df_day)
 
             st.markdown("<div style='height:25px'></div>",
                         unsafe_allow_html=True)
@@ -883,15 +884,15 @@ def run(platform: str):
             # =====================================================
             # DATE PROCESSING
             # =====================================================
-            df["Created Time"] = pd.to_datetime(
-                df["Created Time"].astype(str).str.strip(),
+            df_day["Created Time"] = pd.to_datetime(
+                df_day["Created Time"].astype(str).str.strip(),
                 dayfirst=True,
                 errors="coerce"
             )
 
-            df["date"] = df["Created Time"].dt.date
-            df["hour"] = df["Created Time"].dt.hour
-            df["weekday"] = df["Created Time"].dt.day_name()
+            df_day["date"] = df_day["Created Time"].dt.date
+            df_day["hour"] = df_day["Created Time"].dt.hour
+            df_day["weekday"] = df_day["Created Time"].dt.day_name()
 
             # =====================================================
             # COMMON LAYOUT
@@ -917,7 +918,7 @@ def run(platform: str):
             ]
 
             heatmap_data = (
-                df.groupby(["weekday", "hour"])
+                df_day.groupby(["weekday", "hour"])
                 .size()
                 .unstack(fill_value=0)
             )
@@ -935,7 +936,7 @@ def run(platform: str):
             # ORDER TREND
             # =====================================================
             orders_by_day = (
-                df.groupby("date")["Order ID"]
+                df_day.groupby("date")["Order ID"]
                 .nunique()
                 .reset_index()
             )
@@ -967,7 +968,7 @@ def run(platform: str):
             # =====================================================
 
             cancel_orders_day = (
-                df[df["Order Status"] == "Cancelled"]
+                df_day[df_day["Order Status"].isin(["Cancelled", "Canceled"])]
                 .groupby("date")["Order ID"]
                 .nunique()
                 .reset_index()
@@ -997,7 +998,7 @@ def run(platform: str):
             # TOP SKU
             # =====================================================
             top_sku = (
-                df.groupby("SKU Category")
+                df_day.groupby("SKU Category")
                 .size()
                 .reset_index(name="orders")
                 .sort_values("orders", ascending=False)
@@ -1027,7 +1028,7 @@ def run(platform: str):
             # CANCEL SKU
             # =====================================================
             cancel_sku = (
-                df[df["Order Status"] == "Cancelled"]
+                df_day[df_day["Order Status"].isin(["Cancelled", "Canceled"])]
                 .groupby("SKU Category")["Order ID"]
                 .nunique()
                 .reset_index(name="canceled_orders")
@@ -1071,7 +1072,7 @@ def run(platform: str):
             # =====================================================
             # NMV PROCESSING
             # =====================================================
-            df_cal = df[df["Order Status"] != "Cancelled"].copy()
+            df_cal = df_day[df_day["Order Status"] != "Cancelled"].copy()
 
             df_cal["NMV"] = (
                 df_cal["SKU Subtotal After Discount"]

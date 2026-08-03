@@ -634,18 +634,18 @@ def run(platform: str):
         if uploaded_file:
             st.sidebar.success(f"{uploaded_file.name} uploaded!")
 
-            if st.sidebar.button("Check GMV Now"):
+            if st.sidebar.button("Check Now"):
                 try:
-                    df = read_file_tiktok(uploaded_file)
-                    st.session_state.df = df
+                    df_month = read_file_tiktok(uploaded_file)
+                    st.session_state.df_month = df_month
                 except Exception as e:
                     st.sidebar.error(f"Cannot read file: {e}")
 
-        if "df" in st.session_state:
-            df = st.session_state["df"].copy()
+        if "df_month" in st.session_state:
+            df_month = st.session_state["df_month"].copy()
 
             df_this_month_tt, df_last_month_tt, current_tt, previous_tt = kpi_tiktok(
-                df)
+                df_month)
 
             current_month_tt = int(current_tt["month"])
             current_year_tt = int(current_tt["year"])

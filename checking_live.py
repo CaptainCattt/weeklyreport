@@ -264,32 +264,26 @@ def run(platform: str):
             col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 2, 1, 1, 2])
 
             col1.metric("📦 Orders", summary_df["Orders"].sum())
-
             col2.metric(
                 "💰 GMV",
                 f"{summary_df['GMV'].sum():,.0f}"
             )
-
             col3.metric(
                 "💸 Commission",
                 f"{summary_df['Commission'].sum():,.0f}"
             )
-
             col4.metric(
                 "👤 Creators",
                 summary_df["Creator Username"].nunique()
             )
-
             col5.metric(
                 "🎬 Contents",
                 summary_df["Content ID"].nunique()
             )
-
             col6.metric(
                 "🛒 AOV",
                 f"{summary_df['GMV'].sum()/summary_df['Orders'].sum():,.0f}"
             )
-
             daily = summary_df.groupby("Time Created", as_index=False).agg(
                 GMV=("GMV", "sum")
             )
