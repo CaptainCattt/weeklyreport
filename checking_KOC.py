@@ -170,7 +170,11 @@ def run(platform: str):
             # =========================================================
             # 1. CLEAN ORDER DATA
             # =========================================================
-
+            df["Time Created"] = pd.to_datetime(
+                df["Time Created"].astype(str).str.strip(),
+                dayfirst=True,
+                errors="coerce"
+            )
             df.rename(
                 columns={
                     "Est. Commission Base": "GMV",
