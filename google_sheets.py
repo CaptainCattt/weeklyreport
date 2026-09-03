@@ -1,1 +1,1 @@
-GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/1NUYeyOsu7RzK-tQAt865Qq0PUuNSWOKSD7bhzFKxnqw/edit?gid=0#gid=0"
+GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/1lSQDihuZgww39Pj_N4tNOVTowerLIi5p0OMS2opbEJQ/edit?gid=0#gid=0"
