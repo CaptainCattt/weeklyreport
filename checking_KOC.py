@@ -88,6 +88,11 @@ def read_file_video_tt(file_obj):
     else:
         raise ValueError("Unsupported file format. Please upload CSV or XLSX.")
 
+    df.columns = (
+        df.columns
+        .astype(str)
+        .str.strip()
+    )
     return df
 
 
